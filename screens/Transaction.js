@@ -70,34 +70,28 @@ export default class TransactionScreen extends Component {
     await this.getBookDetails(bookId);
     await this.getStudentDetails(studentId);
 
-    var transactionType = await this.checkBookAvailability(bookId);
-    
-         if (!transactionType) {
-      this.setState({ bookId: "", studentId: "" });
-      // Apenas para usuários do Android
-      // ToastAndroid.show("O livro não existe no banco de dados da biblioteca!", ToastAndroid.SHORT);
-      Alert.alert("O livro não existe no banco de dados da biblioteca!");
-    } 
-    else if (transactionType === "issue") {
+    //Cheque disponibilidade do livro
+
+    //Faça condicionais para realizar transações de acordo com disponibilidade 
+    db.collection("books")
+      .doc(bookId)
+      .get()
+      .then(doc => {
+        var book = doc.data();
+        if (book.is_book_available) {
           var { bookName, studentName } = this.state;
           this.initiateBookIssue(bookId, studentId, bookName, studentName);
-
-          // Apenas para usuários do Android
-         // ToastAndroid.show("Livro entregue para o aluno!", ToastAndroid.SHORT);
-
+          //Apenas para usuários do Android
+          //ToastAndroid.show("Livro entregue para o aluno!", ToastAndroid.SHORT);
            Alert.alert("Livro entregue para o aluno!");
         } else {
           var { bookName, studentName } = this.state;
           this.initiateBookReturn(bookId, studentId, bookName, studentName);
-
           // Apenas para usuários do Android
-       /*   ToastAndroid.show(
-            "Livro retornado à biblioteca!",
-            ToastAndroid.SHORT
-          );*/
-
+          /*ToastAndroid.show("Livro retornado à biblioteca!", ToastAndroid.SHORT);*/
           Alert.alert("Livro retornado à biblioteca!");
         }
+      });
       
   };
 
@@ -221,6 +215,7 @@ export default class TransactionScreen extends Component {
       );
     }
     return (
+       <KeyboardAvoidingView  style={styles.container} behavior="padding">
         <ImageBackground source={bgImage} style={styles.bgImage}>
           <View style={styles.upperContainer}>
             <Image source={appIcon} style={styles.appIcon} />
@@ -265,7 +260,7 @@ export default class TransactionScreen extends Component {
             </TouchableOpacity>
           </View>
         </ImageBackground>
-     
+      </KeyboardAvoidingView>
     );
   }
 }
